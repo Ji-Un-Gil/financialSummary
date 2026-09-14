@@ -12,7 +12,13 @@ npm run check
 npm run deploy
 ```
 
-로컬 서버를 켠 뒤 `node smoke.mjs`로 초기 연결·도구 목록·시각·고유 확인값·입력 오류 처리를 확인한다. 배포 후에는 `node smoke.mjs https://실제-worker주소`로 같은 검사를 반복한다. 2026-09-14 로컬 빌드와 이 검사를 통과했다. 원격 배포 및 ChatGPT 예약 호출은 아직 검증 전이다.
+로컬 서버를 켠 뒤 `node smoke.mjs`로 초기 연결·도구 목록·시각·고유 확인값·입력 오류 처리를 확인한다. 배포 후에는 `node smoke.mjs https://실제-worker주소`로 같은 검사를 반복한다. 2026-09-14 로컬 빌드와 이 검사를 통과했다.
+
+2026-09-15 KST 원격 검사도 통과했다. 배포 버전은 `ecf85665-d283-4dd4-89d8-93a32ae66cdb`이며, 서버 응답 시각은 `2026-09-14T21:59:35.375Z`, 확인값은 `83f9c70a-adf0-4a5d-8875-c5c1dca2dcc4`였다. ChatGPT 수동 연결 및 예약 호출은 아직 검증 전이다.
+
+- 서버: https://financial-summary-mcp-probe.lak2577.workers.dev
+- ChatGPT 연결 URL: https://financial-summary-mcp-probe.lak2577.workers.dev/mcp
+- 배포 인증: 해당 Cloudflare 계정에 한정한 `Workers Scripts:Edit` 사용자 토큰으로 직접 배포했다. Git 연동 자동 배포는 설정하지 않았다. 토큰 값을 저장소에 저장하지 않는다.
 
 Cloudflare 계정 인증이 필요하다. 무료 Workers 요금제를 유지하고 유료 부가 기능은 활성화하지 않는다. 도메인·KV·Durable Objects·데이터베이스 바인딩은 필요하지 않다.
 
