@@ -17,6 +17,7 @@
 - [일일 보고서 양식](templates/daily.md)
 - [검증표 양식](templates/evidence.md)
 - [발행 목록](briefings/README.md)
+- [Cloudflare MCP 연결 시험](integrations/cloudflare-mcp/README.md)
 
 ## 운영 방식
 
