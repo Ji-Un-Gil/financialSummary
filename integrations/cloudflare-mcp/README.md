@@ -14,7 +14,7 @@ npm run deploy
 
 로컬 서버를 켠 뒤 `node smoke.mjs`로 초기 연결·도구 목록·시각·고유 확인값·입력 오류 처리를 확인한다. 배포 후에는 `node smoke.mjs https://실제-worker주소`로 같은 검사를 반복한다. 2026-09-14 로컬 빌드와 이 검사를 통과했다.
 
-2026-09-15 KST 원격 검사도 통과했다. 배포 버전은 `ecf85665-d283-4dd4-89d8-93a32ae66cdb`이며, 서버 응답 시각은 `2026-09-14T21:59:35.375Z`, 확인값은 `83f9c70a-adf0-4a5d-8875-c5c1dca2dcc4`였다. ChatGPT 수동 연결 및 예약 호출은 아직 검증 전이다.
+2026-09-15 KST 원격 검사도 통과했다. 배포 버전은 `ecf85665-d283-4dd4-89d8-93a32ae66cdb`이며, 서버 응답 시각은 `2026-09-14T21:59:35.375Z`, 확인값은 `83f9c70a-adf0-4a5d-8875-c5c1dca2dcc4`였다.
 
 - 서버: https://financial-summary-mcp-probe.lak2577.workers.dev
 - ChatGPT 연결 URL: https://financial-summary-mcp-probe.lak2577.workers.dev/mcp
@@ -26,12 +26,16 @@ GitHub 연동 배포를 사용하는 경우 저장소는 `Ji-Un-Gil/financialSum
 
 ## ChatGPT 수동 연결 시험
 
+2026-09-15 KST `Financial Summary Probe` 앱을 연결하고 기존 금융 뉴스 대화에서 실제 도구 입력·출력 기록을 확인했다. `marker: manual-test-20260915` 호출의 응답 시각은 `2026-09-14T22:06:30.074Z`, 확인값은 `6cea180c-b149-4074-a18b-80cfc40a2967`이다. `github_connected`와 `data_saved`는 모두 `false`였다. 수동 호출 성공은 예약 호출이나 GitHub 자동 저장 성공을 뜻하지 않는다.
+
 1. 개발자 모드의 맞춤형 앱 추가에서 실제 배포 URL의 `/mcp`를 입력한다.
 2. 앱 이름은 `Financial Summary Probe`, 인증은 `No Authentication`을 선택한다. 이 선택은 무권한 시험 서버에만 해당한다.
 3. 해당 앱을 선택한 대화에서 `check_cloud_connection`을 marker `manual-test`로 호출하도록 요청한다.
 4. 도구 호출 내역과 반환된 `server_time_utc`, `receipt_id`, `github_connected: false`를 확인한다. 답변에 성공했다는 문장만 있으면 시험 통과로 간주하지 않는다.
 
 ## 예약 시험
+
+2026-09-15 07:11 KST에 한 번 실행하는 `Financial Summary MCP 예약 연결 시험`을 생성했다. 예약 편집기에서 실행 시각과 실제 도구 호출 지침을 확인했다. 기존 매일 18:30 뉴스 예약은 변경하지 않았다. 로컬 Wrangler 개발 서버를 종료한 뒤 예약 결과를 확인한다.
 
 수동 호출 성공 후 같은 앱을 사용할 수 있는 클라우드 대화에서 가까운 미래의 **일회성 예약**을 만든다. 기존 뉴스 예약은 바꾸지 않는다.
 
