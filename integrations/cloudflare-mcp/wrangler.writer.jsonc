@@ -1,0 +1,10 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "financial-summary-writer",
+  "main": "src/writer.js",
+  "compatibility_date": "2026-09-14",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "observability": { "enabled": false },
+  "kv_namespaces": [{ "binding": "OAUTH_KV", "id": "dc58d3bb042a4024982a933747372ce9" }]
+}
