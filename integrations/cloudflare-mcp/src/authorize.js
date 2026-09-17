@@ -4,7 +4,7 @@ const escape = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<'
 const digest = value => createHash('sha256').update(value).digest();
 const headers = { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store',
   'Content-Security-Policy': "default-src 'none'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'",
-  'Referrer-Policy': 'no-referrer', 'X-Content-Type-Options': 'nosniff' };
+  'Referrer-Policy': 'same-origin', 'X-Content-Type-Options': 'nosniff' };
 
 export const authorizationHandler = {
   async fetch(request, env) {

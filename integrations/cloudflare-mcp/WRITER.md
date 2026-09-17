@@ -2,7 +2,7 @@
 
 ## 현재 상태
 
-2026-09-17 기준 Worker 원격 배포와 비밀 설정 등록을 완료했다. ChatGPT OAuth 연결과 수동·예약 GitHub 저장은 아직 성공하지 않았다.
+2026-09-18 기준 Worker 배포, ChatGPT OAuth 연결, 수동·무인 예약의 GitHub 시험 저장을 확인했다. 매일 18:30 Asia/Seoul 뉴스 예약에는 같은 실행 안에서 보고서와 검증표를 저장하도록 설정했다. 실제 뉴스 보고서의 첫 무인 저장 결과는 아직 확인하지 않았다.
 
 - 기존 공개 `financial-summary-mcp-probe`는 연결 확인 전용이며 GitHub에 저장하지 않는다.
 - 새 `financial-summary-writer`는 별도 Worker다. OAuth 인증 없이 저장 도구에 접근할 수 없다.
@@ -10,10 +10,22 @@
 - GitHub fine-grained token `financial-summary-cloud-writer`를 발급해 Worker secret에 등록했다. 저장소 하나, Contents 읽기·쓰기와 Metadata 읽기만 허용하며 GitHub에 표시된 만료일은 2026-10-17이다.
 - 공개 `/health`의 200과 무인증 `/mcp`의 401을 실제 확인했다.
 - ChatGPT 앱 `Financial Summary Writer`를 등록했다. 앱 ID는 `asdk_app_6aab1323fa9c8191b1c65ec729bff2a0`이다.
-- 인증 폼 제출 때 Chrome과 내장 브라우저 모두 `ERR_BLOCKED_BY_CLIENT`를 표시했다. 자동 리디렉션을 승인 완료 링크 방식으로 바꿔도 같은 현상이 발생했다. 정확한 차단 원인은 미확정이며 직접 클릭 결과를 확인 중이다.
-- 클라우드 대화에서 저장 도구 탐색을 시도했으나 아직 Writer 도구가 노출되지 않았다. GitHub 시험 파일은 생성되지 않았으며 기존 일일 예약은 변경하지 않았다.
-- 단위 테스트 8건, 배포 dry-run, 로컬 Workers의 PKCE OAuth 승인·토큰 교환·인증된 MCP 도구 목록·무인증/잘못된 토큰 차단 시험을 통과했다. 원격 쓰기 성공과는 구분한다.
+- 인증 폼의 `no-referrer` 설정이 정상 POST의 Origin을 `null`로 만들어 출처 검증과 충돌했다. `same-origin`으로 수정한 뒤 실제 브라우저에서 승인 완료와 ChatGPT 연결을 확인했다. Origin·쿠키·nonce·암호 검사는 유지한다.
+- Cloudflare Workers가 `fetch`의 `redirect: 'error'`를 지원하지 않아 첫 저장 호출이 실패했다. `manual`로 수정하고 3xx 응답을 오류 처리하므로 다른 주소로 인증정보를 전달하지 않는다.
+- 인증 문제와 GitHub 리디렉션 차단을 포함한 단위 테스트 10건을 통과했다.
+- 배포 dry-run, 로컬 Workers의 PKCE OAuth 승인·토큰 교환·인증된 MCP 도구 목록·무인증/잘못된 토큰 차단 시험을 통과했다. 2026-09-18 Node.js 번들 런타임으로 단위 테스트 10건을 다시 실행해 통과했다.
 - 공식 GitHub 플러그인의 계정 연결은 했으나 개인 저장소용 GitHub App 설치는 승인하지 않았다. 설치 화면이 Contents 외에 Actions·Workflows·Issues·Pull requests 쓰기 권한을 함께 요구해 최소 권한 경로로 사용하지 않았다.
+
+## 원격 실행 검증 기록
+
+- 수동 시험: `manual-20260917-oauth-fixed`, 커밋 [2f1fbdb](https://github.com/Ji-Un-Gil/financialSummary/commit/2f1fbdb5d5303d496aaae3e10b55d69988a4bfe8). 같은 내용 재시도에서는 추가 커밋 없이 기존 결과를 반환했다.
+- 2026-09-17 18:30 KST 일회성 클라우드 예약: `scheduled-20260917-write-01`, 커밋 [7e5260d](https://github.com/Ji-Un-Gil/financialSummary/commit/7e5260d069dd7bd29dc1983f88d50cc164a03a18). 예약 실행 후 추가 승인 조작 없이 시험 파일이 생성되었고 원격 내용을 대조했다. 도구 반환 서버 시각은 `2026-09-17T09:30:35.128Z`였다.
+- 2026-09-18 설정 화면 재확인: `Financial Summary Writer`의 권한은 ‘모든 액션 허용’이며 `save_connection_test`, `save_daily_summary` 두 도구가 표시된다. 서버가 제공하는 저장소·경로 제한은 그대로 적용된다.
+- 기존 ChatGPT 예약 ‘오늘의 금융 핵심 뉴스’의 매일 오후 6:30 설정과 전체 저장 지시가 유지됨을 확인했다. 예약 ID: `6aa7e4f9b49c8191b599c995bdca5f93`. 보고서 원문 검증, 18:00 마감, 부분 수집 표시, 도구 오류 시 실패 알림을 포함한다.
+- 중복 로컬 예약 `automation`은 2026-09-18에 PAUSED로 변경했다. 클라우드 예약을 운영 경로로 사용한다.
+- 9월 17일 실제 뉴스 보고서는 사용자 요청으로 로컬에서 작성·푸시했다. 이를 클라우드 뉴스 자동 저장 성공 사례로 계산하지 않는다. 변경된 일일 예약의 첫 뉴스 저장 검증은 9월 18일 실행 이후 가능하다.
+
+토큰 만료일은 2026-10-17이므로 만료 전에 같은 최소 권한으로 갱신하고 Worker secret을 교체해야 한다. 원격 서버는 사실성을 검증하지 않으며, 저장 성공과 내용 검증은 별개다.
 
 ## 권한과 저장 범위
 

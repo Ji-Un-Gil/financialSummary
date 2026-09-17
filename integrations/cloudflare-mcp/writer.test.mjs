@@ -15,7 +15,7 @@ function githubMock({ existing, race = false } = {}) {
   const fetcher = async (url, options) => {
     calls.push({ url, ...options });
     assert.ok(url.startsWith('https://api.github.com/repos/Ji-Un-Gil/financialSummary/'));
-    assert.equal(options.redirect, 'error');
+    assert.equal(options.redirect, 'manual');
     const path = url.split('financialSummary/')[1];
     if (path === 'git/ref/heads/master') return Response.json({ object: { sha: 'parent' } });
     if (path === 'git/commits/parent') return Response.json({ tree: { sha: 'base' } });
@@ -105,4 +105,26 @@ test('authorization requires a cookie-bound session and correct password', async
   assert.match(await consent.text(), /href="https:\/\/chatgpt.com\/"/);
   assert.equal(consent.headers.get('location'), null);
   assert.equal(grants, 1);
+});
+
+test('login form preserves same-origin POST origin and rejects null origin', async () => {
+  const env = { AUTH_PASSWORD: 'x'.repeat(40), GITHUB_TOKEN: 'test',
+    OAUTH_KV: { put: async () => {} },
+    OAUTH_PROVIDER: { parseAuthRequest: async () => ({ clientId: 'client', redirectUri: 'https://chatgpt.com/connector_platform_oauth_redirect' }), lookupClient: async () => ({ clientName: 'ChatGPT' }) } };
+  const login = await authorizationHandler.fetch(new Request('https://example.com/authorize'), env);
+  assert.equal(login.status, 200);
+  assert.equal(login.headers.get('referrer-policy'), 'same-origin');
+  assert.match(login.headers.get('content-security-policy'), /form-action 'self'/);
+  assert.equal((await authorizationHandler.fetch(new Request('https://example.com/authorize', { method: 'POST', headers: { Origin: 'null' } }), env)).status, 403);
+});
+
+
+test('GitHub redirects are rejected without forwarding credentials', async () => {
+  let requests = 0;
+  await assert.rejects(saveFiles('test', buildFiles({ kind: 'test', marker: 'redirect' }), async (url, options) => {
+    requests++;
+    assert.equal(options.redirect, 'manual');
+    return new Response(null, {status: 302, headers: {Location: 'https://other.example/'}});
+  }), /302/);
+  assert.equal(requests, 1);
 });

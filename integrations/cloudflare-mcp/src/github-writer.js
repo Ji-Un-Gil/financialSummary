@@ -36,7 +36,7 @@ export async function saveFiles(token, files, fetcher = fetch) {
   if (!token) throw new Error('GitHub credential is not configured');
   async function api(path, method = 'GET', body, allow404 = false) {
     const response = await fetcher(`https://api.github.com/repos/${REPOSITORY}/${path}`, {
-      method, redirect: 'error',
+      method, redirect: 'manual',
       headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json',
         'X-GitHub-Api-Version': '2022-11-28', 'User-Agent': 'financial-summary-writer',
         ...(body ? { 'Content-Type': 'application/json' } : {}) },
