@@ -100,6 +100,9 @@ test('authorization requires a cookie-bound session and correct password', async
   assert.equal((await authorizationHandler.fetch(req('wrong'), env)).status, 403);
   assert.equal((await authorizationHandler.fetch(req(env.AUTH_PASSWORD, 'other'), env)).status, 403);
   assert.equal(grants, 0);
-  assert.equal((await authorizationHandler.fetch(req(env.AUTH_PASSWORD), env)).status, 302);
+  const consent = await authorizationHandler.fetch(req(env.AUTH_PASSWORD), env);
+  assert.equal(consent.status, 200);
+  assert.match(await consent.text(), /href="https:\/\/chatgpt.com\/"/);
+  assert.equal(consent.headers.get('location'), null);
   assert.equal(grants, 1);
 });

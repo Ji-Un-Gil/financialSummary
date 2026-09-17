@@ -40,7 +40,7 @@ export const authorizationHandler = {
     const { redirectTo } = await env.OAUTH_PROVIDER.completeAuthorization({ request: auth,
       userId: 'Ji-Un-Gil', metadata: { repository: 'Ji-Un-Gil/financialSummary' },
       scope: ['summary:write'], props: { userId: 'Ji-Un-Gil', scopes: ['summary:write'] } });
-    return new Response(null, { status: 302, headers: { ...headers, Location: redirectTo,
+    return new Response(`<!doctype html><html lang="ko"><meta charset="utf-8"><title>연결 승인 완료</title><h1>연결 승인 완료</h1><p>아래 링크를 눌러 ChatGPT에서 연결을 완료하세요.</p><a href="${escape(redirectTo)}">ChatGPT로 돌아가 연결 완료</a></html>`, { headers: { ...headers,
       'Set-Cookie': 'fs_auth=; HttpOnly; Secure; SameSite=Lax; Path=/authorize; Max-Age=0' } });
   },
 };

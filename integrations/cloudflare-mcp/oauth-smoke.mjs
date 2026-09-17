@@ -28,8 +28,10 @@ try {
   const html = await authorize.text();
   const nonce = html.match(/name="nonce" value="([a-f0-9-]+)"/)[1];
   const consent = await call('/authorize', { method: 'POST', headers: { Origin: origin, Cookie: cookie, 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ nonce, password }).toString() });
-  assert.equal(consent.status, 302);
-  const code = new URL(consent.headers.get('location')).searchParams.get('code');
+  assert.equal(consent.status, 200);
+  const consentHtml = await consent.text();
+  const callback = consentHtml.match(/href="([^"]+)"/)[1].replaceAll('&amp;', '&');
+  const code = new URL(callback).searchParams.get('code');
   const token = await call('/oauth/token', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({ grant_type: 'authorization_code', client_id: client.client_id, redirect_uri: 'https://chatgpt.com/test-callback', code, code_verifier: verifier, resource: origin + '/mcp' }).toString() });
   assert.equal(token.status, 200);

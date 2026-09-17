@@ -2,13 +2,16 @@
 
 ## 현재 상태
 
-2026-09-16 기준 구현 및 로컬 단위 검증 단계다. 아직 쓰기 서버의 원격 배포, ChatGPT OAuth 연결, 예약 저장 성공을 확인하지 않았다.
+2026-09-17 기준 Worker 원격 배포와 비밀 설정 등록을 완료했다. ChatGPT OAuth 연결과 수동·예약 GitHub 저장은 아직 성공하지 않았다.
 
 - 기존 공개 `financial-summary-mcp-probe`는 연결 확인 전용이며 GitHub에 저장하지 않는다.
 - 새 `financial-summary-writer`는 별도 Worker다. OAuth 인증 없이 저장 도구에 접근할 수 없다.
 - Cloudflare KV `financial-summary-oauth` 생성 완료. 인증 세션·OAuth 승인 보관 전용이다.
-- GitHub fine-grained token 생성은 GitHub의 본인 확인 화면에서 대기 중이다. 실제 토큰은 아직 만들지 않았다.
-- Contents 읽기·쓰기와 Metadata 읽기만 선택해 생성 직전까지 갔으나, 브라우저 세션 종료 후 토큰 미발급을 다시 확인했다. 새 Chrome 본인 확인 화면을 유지했다.
+- GitHub fine-grained token `financial-summary-cloud-writer`를 발급해 Worker secret에 등록했다. 저장소 하나, Contents 읽기·쓰기와 Metadata 읽기만 허용하며 GitHub에 표시된 만료일은 2026-10-17이다.
+- 공개 `/health`의 200과 무인증 `/mcp`의 401을 실제 확인했다.
+- ChatGPT 앱 `Financial Summary Writer`를 등록했다. 앱 ID는 `asdk_app_6aab1323fa9c8191b1c65ec729bff2a0`이다.
+- 인증 폼 제출 때 Chrome과 내장 브라우저 모두 `ERR_BLOCKED_BY_CLIENT`를 표시했다. 자동 리디렉션을 승인 완료 링크 방식으로 바꿔도 같은 현상이 발생했다. 정확한 차단 원인은 미확정이며 직접 클릭 결과를 확인 중이다.
+- 클라우드 대화에서 저장 도구 탐색을 시도했으나 아직 Writer 도구가 노출되지 않았다. GitHub 시험 파일은 생성되지 않았으며 기존 일일 예약은 변경하지 않았다.
 - 단위 테스트 8건, 배포 dry-run, 로컬 Workers의 PKCE OAuth 승인·토큰 교환·인증된 MCP 도구 목록·무인증/잘못된 토큰 차단 시험을 통과했다. 원격 쓰기 성공과는 구분한다.
 - 공식 GitHub 플러그인의 계정 연결은 했으나 개인 저장소용 GitHub App 설치는 승인하지 않았다. 설치 화면이 Contents 외에 Actions·Workflows·Issues·Pull requests 쓰기 권한을 함께 요구해 최소 권한 경로로 사용하지 않았다.
 
@@ -50,7 +53,7 @@ npx wrangler secret put AUTH_PASSWORD --config wrangler.writer.jsonc
 
 위 명령은 대화형 보안 입력을 사용한다. 비밀값을 명령 인자로 붙이지 않는다. 비밀값이 설정되기 전에는 인증 승인이 503으로 차단된다.
 
-예정 MCP 주소: `https://financial-summary-writer.lak2577.workers.dev/mcp` (현재 배포 확인 전).
+배포된 MCP 주소: `https://financial-summary-writer.lak2577.workers.dev/mcp`. 인증 연결과 실제 GitHub 저장 성공은 별도로 검증해야 한다.
 
 ## 완료 판정
 
