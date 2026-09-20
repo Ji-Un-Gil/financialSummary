@@ -33,7 +33,7 @@ function details(post,text) {
   const status=text.match(/^- 수집 상태:\s*(.+)$/m)?.[1];
   const summary=text.match(/(?:^|\n)## 오늘의 핵심[^\S\n]*\n([\s\S]*?)(?=\n## |$)/)?.[1] || '';
   const headings=[...text.matchAll(/^##\s+\d+[.)]\s*(.+)$/gm)].map(m=>m[1]);
-  return {...post,status:status?plain(status):post.status,summary:plain(summary),summaryMarkdown:summary,headline:post.title==='금융 뉴스'&&headings.length?headings.join(' · '):post.title};
+  return {...post,status:status?plain(status):post.status,summary:plain(summary),summaryMarkdown:summary,headline:headings.length?headings.map(plain).join(' · '):(/금융\s*뉴스/.test(post.title)&&status?.includes('없음')?'새 소식 검증 결과 · 수집 한계':post.title)};
 }
 function shortStatus(status) {return status.includes('부분')?'부분 수집':status.includes('없음')?'확인 가능 항목 없음':status.includes('정상')?'정상 수집':'수집 상태는 본문 참조';}
 function postURL(date,evidence=false){return `#/${evidence?'evidence':'post'}/${date}`;}
@@ -58,6 +58,16 @@ async function home(token){
   document.getElementById('search').addEventListener('input',e=>{searchTerm=e.target.value;archivePage=1;renderCards();});
   document.getElementById('month').addEventListener('change',e=>{month=e.target.value;archivePage=1;renderCards();});
   renderCards();
+  // Resolve archive labels from the actual report, including older Writer entries.
+  const queue=posts.filter(p=>!p.metadataLoaded);
+  Promise.all(Array.from({length:Math.min(4,queue.length)},async()=>{
+    while(queue.length){
+      const item=queue.shift();
+      try{const meta=details(item,await read(item.path));Object.assign(item,meta,{title:meta.headline,metadataLoaded:true});}
+      catch{/* Keep the index entry accessible if a report cannot be loaded. */}
+      if(token===revision)renderCards();
+    }
+  }));
   if(!posts.length){document.getElementById('latest').innerHTML='<p class="empty">아직 발행된 금융 노트가 없습니다.</p>';return;}
   const p=posts[0];let d=p;
   try{d=details(p,await read(p.path));}catch{d={...p,summary:'본문을 불러오지 못했습니다. 글을 열어 다시 확인해주세요.'};}
