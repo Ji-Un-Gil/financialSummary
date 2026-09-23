@@ -1,0 +1,9 @@
+{
+  "name": "financial-notes-counter",
+  "main": "worker.js",
+  "compatibility_date": "2026-09-18",
+  "workers_dev": true,
+  "observability": { "enabled": false },
+  "durable_objects": { "bindings": [{ "name": "COUNTER", "class_name": "Counter" }] },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Counter"] }]
+}
