@@ -128,3 +128,13 @@ test('GitHub redirects are rejected without forwarding credentials', async () =>
   }), /302/);
   assert.equal(requests, 1);
 });
+
+test('index displays the report topic and cannot insert a second row or Markdown link', async () => {
+  const { buildIndexRow } = await import('./src/github-writer.js');
+  assert.equal(buildIndexRow('2026-09-30', '# 2026-09-30 금융 뉴스 — 실손보험 청구 개선\n\n- 수집 상태: 부분 수집 · 1건'),
+    '| 2026-09-30 | [실손보험 청구 개선](2026/09/2026-09-30.md) | 부분 수집 · 1건 |');
+  const row = buildIndexRow('2026-09-30', '# bad [link](https://example.com) | title\n- 수집 상태: partial | bad');
+  assert.equal(row.split('|').length, 5);
+  assert.equal((row.match(/\]\(/g) || []).length, 1);
+  assert.equal(row.split('\n').length, 1);
+});

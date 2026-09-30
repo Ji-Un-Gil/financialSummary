@@ -1,6 +1,19 @@
 export const REPOSITORY = 'Ji-Un-Gil/financialSummary';
 export const BRANCH = 'master';
 
+// Shared by local preflight and the cloud writer. Markdown table syntax from a
+// headline must not be able to introduce another link or row into the index.
+export function buildIndexRow(date, report) {
+  const heading = report.match(/^#\s+(.+)$/m)?.[1] || `${date} 금융 뉴스`;
+  const title = heading.replace(/^20\d{2}-\d{2}-\d{2}\s*/, '')
+    .replace(/^금융 뉴스\s*[—–-]\s*/, '')
+    .replace(/[\[\]<>|\\`]/g, ' ').replace(/\s+/g, ' ').trim();
+  const status = report.match(/^- 수집 상태:\s*(.+)$/m)?.[1] || '본문 수집 상태 참조';
+  const safeStatus = status.replace(/[\[\]<>|\\`]/g, ' ').replace(/\s+/g, ' ').trim();
+  return `| ${date} | [${title || '금융 뉴스'}](${date.slice(0, 4)}/${date.slice(5, 7)}/${date}.md) | ${safeStatus} |`;
+}
+
+
 export function buildFiles(input) {
   if (input.kind === 'test') {
     if (!/^[a-zA-Z0-9_-]{1,64}$/.test(input.marker)) throw new Error('Invalid marker');
@@ -70,7 +83,7 @@ export async function saveFiles(token, files, fetcher = fetch) {
     const relative = files[0].path.slice('briefings/'.length);
     const date = relative.slice(-13, -3);
     if (previous.includes(relative)) throw new Error('Index already references this date; manual review required');
-    entries = [...files, { path: 'briefings/README.md', content: previous.trimEnd() + `\n| ${date} | [금융 뉴스](${relative}) | 본문 수집 상태 참조 |\n` }];
+    entries = [...files, { path: 'briefings/README.md', content: previous.trimEnd() + `\n${buildIndexRow(date, files[0].content)}\n` }];
   }
   const tree = await api('git/trees', 'POST', { base_tree: commit.tree.sha,
     tree: entries.map(f => ({ path: f.path, mode: '100644', type: 'blob', content: f.content })) });
