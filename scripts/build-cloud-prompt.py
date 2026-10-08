@@ -4,7 +4,7 @@ import hashlib
 import subprocess
 
 root = Path(__file__).resolve().parents[1]
-files = ['AGENTS.md', 'docs/editorial-policy.md', 'docs/daily-run.md', 'docs/sources.md', 'templates/daily.md', 'templates/evidence.md']
+files = ['AGENTS.md', 'docs/editorial-policy.md', 'docs/daily-run.md', 'docs/sources.md', 'templates/daily.md', 'templates/evidence.md', 'docs/manual-parity-procedure.md']
 sha = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=root, text=True).strip()
 header = '''매일 18:30 Asia/Seoul에 금융 뉴스를 조사·검증하고 Financial Summary Writer의 save_daily_summary로 Ji-Un-Gil/financialSummary에 저장한다. 사용자는 이 저장소에 보고서·검증표·목록을 자동 추가하는 것을 승인했다. 별도 유료 AI API나 로컬 컴퓨터에 의존하지 않는다.
 
